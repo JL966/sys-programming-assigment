@@ -14,5 +14,6 @@ void main(void)
 {
     App_Init();
     MySTC_Init();
+    App_StartUart();
     while (1) MySTC_OS();
 }

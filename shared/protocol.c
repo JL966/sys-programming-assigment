@@ -32,7 +32,12 @@ ProtoResult Proto_Encode(const ProtoFrame *frame, unsigned char out[PROTO_FRAME_
 {
     unsigned char i;
     unsigned short crc;
+#if !defined(__C51__) && !defined(__CX51__)
+    /* Keil C51 encodes an xdata generic pointer as {0x00, offset_hi, offset_lo},
+       so a valid buffer at xdata 0x0000 compares equal to NULL.  The firmware
+       always passes real buffers, so the guard only makes sense off-target. */
     if (frame == 0 || out == 0) return PROTO_ERR_ARGUMENT;
+#endif
     if (frame->version != PROTO_VERSION) return PROTO_ERR_VERSION;
     if (frame->payload_len > PROTO_PAYLOAD_SIZE) return PROTO_ERR_LENGTH;
     if ((frame->flags & (unsigned char)~(PROTO_FLAG_RESPONSE | PROTO_FLAG_ERROR)) != 0u)
@@ -62,7 +67,10 @@ ProtoResult Proto_Decode(const unsigned char wire[PROTO_FRAME_SIZE],
                          ProtoFrame *out)
 {
     unsigned char i;
+#if !defined(__C51__) && !defined(__CX51__)
+    /* See the note in Proto_Encode: on C51 an xdata pointer to 0x0000 looks NULL. */
     if (wire == 0 || out == 0) return PROTO_ERR_ARGUMENT;
+#endif
     if (wire[0] != 0xA5u || wire[1] != 0x5Au) return PROTO_ERR_SOF;
     if (read_u16(wire + 22) != Proto_Crc16(wire + 2, 20u)) return PROTO_ERR_CRC;
     if (wire[2] != PROTO_VERSION) return PROTO_ERR_VERSION;

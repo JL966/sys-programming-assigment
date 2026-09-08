@@ -172,13 +172,20 @@ void App_Init(void)
     Seg7Print(APP_ROLE, 0, 10, 10, 10, 10, 10, 10);
     LedPrint(0u);
     KeyInit();
-    Uart1Init(2400ul);
-    Uart2Init(1200ul, Uart2Usedfor485);
-    SetUart1Rxd(uart1_rx, PROTO_FRAME_SIZE, frame_head, 2u);
-    SetUart2Rxd(uart2_rx, PROTO_FRAME_SIZE, frame_head, 2u);
     SetEventCallBack(enumEventUart1Rxd, on_uart1);
     SetEventCallBack(enumEventUart2Rxd, on_uart2);
     SetEventCallBack(enumEventSys10mS, on_10ms);
     SetEventCallBack(enumEventSys1S, on_1s);
     SetEventCallBack(enumEventKey, on_key);
+}
+
+/* UART init must run AFTER MySTC_Init(): the BSP system init re-programs the
+   interrupt enables, so a UART RX interrupt armed before it gets cleared and
+   the node never sees a frame even though the display keeps refreshing. */
+void App_StartUart(void)
+{
+    Uart1Init(2400ul);
+    Uart2Init(1200ul, Uart2Usedfor485);
+    SetUart1Rxd(uart1_rx, PROTO_FRAME_SIZE, frame_head, 2u);
+    SetUart2Rxd(uart2_rx, PROTO_FRAME_SIZE, frame_head, 2u);
 }

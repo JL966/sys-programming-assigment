@@ -11,10 +11,16 @@
 | 网页与报告 | 通过 | 语法/结构测试、IndexedDB 降级、JSON/HTML 转义 |
 | 三个 Keil 工程配置 | 已生成并通过静态约束检查 | 器件、BSP、角色、输出、XRAM `0x06FF` |
 | 三个 Compact HEX | **已生成** | 裸机安全通信基线；三个角色 CODE 均为 610 字节，0 Error、0 Warning |
-| 三个完整功能 HEX | **未生成** | 当前 C51 V9.51 为 Eval；完整 BSP 平台约 9.5 KiB，触发 L250 |
-| 实物下板 | **未执行** | 必须由组员烧录、接线和记录；项目没有伪造通过结论 |
+| 三个完整功能 HEX | **已生成** | 合法 C51 许可证就绪；CODE 约 9450 字节，0 Error |
+| 实物下板（HELLO 层） | **三块板均通过** | `records/20260908-221{2,4,5}-*.md`：CTRL/DUT/REF 各 100/100 挑战 + 8 项坏帧反例 |
+| 实物下板（G1/G2/G3 完整项） | **未执行** | 红外、485、RTC、EEPROM、传感器仍需现场接线与记录 |
 
-G1 核心构建日志已证明 DATA/XDATA 布局错误已消除：CTRL 为 `data=94.7, xdata=539`，链接范围为 `0x0000..0x06FF`。P1 检查点和传感器规则保留在 `firmware/common` 并已通过 GCC 测试，尚未提前链接进 G1 固件；应在 G4 按实际硬件档案逐项接入并重新记录 map。当前 G1 剩余构建阻塞是合法 C51 许可证。
+G1 核心构建日志已证明 DATA/XDATA 布局错误已消除：CTRL 为 `data=94.7, xdata=539`，链接范围为 `0x0000..0x06FF`。P1 检查点和传感器规则保留在 `firmware/common` 并已通过 GCC 测试，尚未提前链接进 G1 固件；应在 G4 按实际硬件档案逐项接入并重新记录 map。
+
+下板过程中定位并修复了两个只在实际硬件上暴露的缺陷（详见 `CHANGELOG.md`）：
+
+- 串口必须在 `MySTC_Init()` **之后**初始化，否则 BSP 系统初始化会清掉已使能的串口接收中断；
+- Keil C51 把指向 `xdata 0x0000` 的泛型指针视为空指针，`Proto_Decode` 的入参判空因此误报参数错误，现已在 C51 下跳过该判空（桌面 GCC 测试仍保留）。
 
 ## 可直接烧录的 2 KiB Compact HEX
 
@@ -38,6 +44,19 @@ powershell -ExecutionPolicy Bypass -File tests\compact\test-compact-manifest.ps1
 ```
 
 三份文件的 MCU CODE 和磁盘大小都设有 2048 字节自动门禁；尺寸、SHA-256 和能力边界记录在 `compact-release-manifest.json`。STC-ISP 烧录时分别选择相应角色文件；默认 UART1 使用 P3.0/P3.1，波特率 2400，11.0592 MHz。
+
+## 下板验证（烧录之后的操作）
+
+把**完整版** HEX（`firmware/{ctrl,dut,ref}/output/Acceptance*.hex`）烧进板子后，用 PC 端脚本验证“角色正确 + UART1 2400 + 24 字节协议 + CRC + HELLO”：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\verify-board.ps1 -ListPorts
+powershell -ExecutionPolicy Bypass -File scripts\verify-board.ps1 -Port COM5 -Role CTRL -Operator 你的名字
+```
+
+脚本发 100 帧黄金 HELLO 逐字节校验响应，再跑 8 个坏帧反例，最后把 `records\<时间>-<角色>-<COM口>.md/.json` 写入仓库。不接板子也可以先自检：`-SelfTest`（同时被 `verify-all.ps1 -SoftwareOnly` 作为门禁调用）。
+
+完整步骤、期望输出、手工兜底帧和失败排查表见 [下板验证手册](docs/compact-on-board-check.md)（该手册对完整版同样适用，只是烧录文件换成 `firmware/{ctrl,dut,ref}/output/Acceptance*.hex`）。完整版会初始化数码管并显示角色号，Compact 版不初始化显示；两者结论都只覆盖串口与 HELLO 层，不能替代 G1/G2/G3。
 
 ## 快速体验 PC 平台
 
@@ -91,6 +110,13 @@ project/
 
 ```text
 5A02A4DF4DA6FBF6F6CC024822974F0692D160B85C271201E70BE519B08D64B9
+```
+
+构建（`build-role.ps1` 会自动查找本机 Keil，不再硬编码协作者机器的路径）：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File firmware\build-all.ps1     # 需要 BSP 模板与合法许可证
+powershell -ExecutionPolicy Bypass -File firmware\build-role.ps1 -Role ctrl -Name AcceptanceCtrl
 ```
 
 构建后预期文件：

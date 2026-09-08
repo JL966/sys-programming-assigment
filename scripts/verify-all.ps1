@@ -15,6 +15,8 @@ try {
     }
     powershell -ExecutionPolicy Bypass -File '.\web\verify-web.ps1'
     if ($LASTEXITCODE -ne 0) { throw 'Web structure check failed' }
+    powershell -ExecutionPolicy Bypass -File '.\tests\board\test-board-tool.ps1'
+    if ($LASTEXITCODE -ne 0) { throw 'Board tool tests failed' }
     powershell -ExecutionPolicy Bypass -File '.\firmware\verify-source.ps1'
     if ($LASTEXITCODE -ne 0) { throw 'Firmware source check failed' }
     if (-not $SoftwareOnly) {

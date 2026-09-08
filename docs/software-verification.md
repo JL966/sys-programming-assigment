@@ -36,10 +36,35 @@ Program Size: data=94.7 xdata=539 code=9487
 LIMIT: 0800H BYTES
 ```
 
-因此当前不能生成可烧录 HEX，也不能生成正式发布清单。这不是源代码 DATA/XDATA 溢出；需要学校提供的合法完整版 C51 许可证后重新运行完整验证。
+因此当时不能生成可烧录 HEX，也不能生成正式发布清单。这不是源代码 DATA/XDATA 溢出。
+
+**2026-09-08 更新**：合法完整版 C51 许可证就绪后，CTRL/DUT/REF 三个完整功能 HEX 已全部构建成功：
+
+```text
+CTRL  Program Size: data=94.7 xdata=539 code=9450   0 Error(s)
+DUT   Program Size: data=94.7 xdata=539 code=9451   0 Error(s)
+REF   Program Size: data=94.7 xdata=539 code=9450   0 Error(s)
+```
+
+构建产物为 `firmware/{ctrl,dut,ref}/output/Acceptance*.hex`（各约 27.8 KiB 文本 HEX）。
+
+## 实物下板验证（2026-09-08）
+
+三块学习板分别烧录对应角色的完整版 HEX，用 `scripts/verify-board.ps1` 通过 CH340（COM5，2400 8N1）验证：
+
+| 角色 | HELLO 挑战 | 坏帧反例 | 往返耗时 | 结论 | 记录 |
+| --- | --- | --- | --- | --- | --- |
+| CTRL | 100/100 | 8/8 | avg 220.3 ms | PASS | `records/20260908-2212-CTRL-COM5.md` |
+| DUT | 100/100 | 8/8 | avg 220.2 ms | PASS | `records/20260908-2214-DUT-COM5.md` |
+| REF | 100/100 | 8/8 | avg 220.6 ms | PASS | `records/20260908-2215-REF-COM5.md` |
+
+下板过程中定位并修复的两个缺陷：
+
+1. `App_Init()` 里在 `MySTC_Init()` 之前初始化串口，BSP 系统初始化会重设中断使能，串口接收中断被清掉——数码管正常刷新但收不到任何帧。修复：拆出 `App_StartUart()`，在 `main()` 里于 `MySTC_Init()` 之后调用。
+2. Keil C51 把指向 `xdata 0x0000` 的泛型指针当作空指针，而 `uart1_pending` 恰好分配在 xdata 0x0000，导致 `Proto_Decode` 的入参判空误报 `PROTO_ERR_ARGUMENT`。修复：该判空只在非 C51 目标保留。
 
 ## 尚未完成的硬件结论
 
-- 三板烧录、HELLO 枚举、RS485/红外接线和现场挑战尚未执行。
+- HELLO 层已通过；RS485 双板/三板、红外、RTC、EEPROM、传感器等 G1/G2/G3 项尚未执行。
 - IR、RTC、ADC、EEPROM 的 P1 规则和纯逻辑已实现并测试，但尚未依据实际板卡档案接入 G4 固件。
 - 所有需要人工或实物确认的记录保持未勾选；模拟数据不得用于证明实板通过。
