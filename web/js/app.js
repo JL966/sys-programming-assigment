@@ -45,7 +45,7 @@ async function persist() {
 
 async function start() {
   if (ui.mode.value !== 'SIMULATION') {
-    setLog('真实模式只接受实际串口证据；当前 C51 许可证阻塞三板 HEX，未运行模拟替代。');
+    setLog('真实模式只接受实际串口证据；请连接已烧录对应角色固件的学习板。');
     return;
   }
   for (const [name, checkbox] of Object.entries(ui.faults)) rig.setFault(name, checkbox.checked);
@@ -66,7 +66,7 @@ ui.mode.addEventListener('change', () => {
   const simulation = ui.mode.value === 'SIMULATION';
   ui.banner.className = `mode-banner ${simulation ? 'simulation' : 'real'}`;
   ui.banner.textContent = simulation ? '模拟数据：用于验证软件流程，不代表学习板已下板通过。' : '真实串口模式：不生成模拟 PASS；需使用已实际编译和烧录的角色固件。';
-  setLog(simulation ? '软件模拟器已启用。' : '真实模式等待合法 C51 构建和下板连接。');
+  setLog(simulation ? '软件模拟器已启用。' : '真实模式已选择；请按下板验证流程连接设备。');
 });
 ui.attempts.addEventListener('click', async event => {
   const retest = event.target.closest('[data-retest]');

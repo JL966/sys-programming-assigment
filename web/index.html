@@ -9,35 +9,41 @@
 </head>
 <body>
   <header class="topbar">
-    <div><p class="eyebrow">STC-B · ACCEPTANCE WORKSTATION</p><h1>学习板自动验收与故障定位平台</h1><p>统一计划、原始证据、分级结论和故障复测历史</p></div>
-    <div class="mode-control"><label for="mode-select">运行来源</label><select id="mode-select"><option value="SIMULATION">软件模拟演示</option><option value="REAL">真实串口诊断</option></select></div>
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">B</span>
+      <div><h1>学习板验收平台</h1><p>自动验收 · 故障定位 · 证据留存</p></div>
+    </div>
+    <div class="topbar-tools">
+      <span class="target-meta">STC15F2K60S2 · 协议 v1</span>
+      <div class="mode-control"><label for="mode-select">运行来源</label><select id="mode-select"><option value="SIMULATION">软件模拟演示</option><option value="REAL">真实串口诊断</option></select></div>
+    </div>
   </header>
 
   <div id="mode-banner" class="mode-banner simulation">模拟数据：用于验证软件流程，不代表学习板已下板通过。</div>
 
   <main>
     <section class="hero-card">
-      <div><span class="step">01 / 连接与计划</span><h2>建立一次可追溯验收</h2><p>选择快速核心计划，或先注入一个可恢复异常来演示“失败—定位—复测”闭环。</p></div>
+      <div><span class="step">01 / 连接与计划</span><h2>新建验收任务</h2><p>选择测试计划后开始执行。模拟模式可注入异常，用于检查失败定位与复测流程。</p></div>
       <div class="controls">
         <label>测试计划<select id="plan-select"><option value="1">01 快速核心 · 5 项</option><option value="2">02 常规覆盖 · 11 项</option><option value="3">03 通信统计</option><option value="4">04 传感器</option><option value="5">05 输出人工</option></select></label>
-        <div class="button-row"><button id="start-button" class="primary">开始验收</button><button id="cancel-button" disabled>取消</button></div>
+        <div class="button-row"><button id="start-button" class="primary" type="button">开始验收</button><button id="cancel-button" type="button" disabled>取消</button></div>
       </div>
     </section>
 
     <section class="grid two">
       <article class="panel"><div class="panel-title"><div><span class="step">02 / 节点</span><h2>角色与前提</h2></div><span id="node-count" class="pill">未预检</span></div><div id="node-grid" class="node-grid"><p class="empty">开始后显示 CTRL / DUT / REF 的角色、板号、固件和档案。</p></div></article>
-      <article class="panel"><div class="panel-title"><div><span class="step">故障注入</span><h2>安全演示开关</h2></div></div><div class="faults"><label><input id="fault-ir" type="checkbox"> 遮挡红外链路</label><label><input id="fault-485" type="checkbox"> 断开 RS485 路径</label><label><input id="fault-rtc" type="checkbox"> 模拟 RTC 停止推进</label><label><input id="fault-eeprom" type="checkbox"> 模拟 EEPROM 恢复不一致</label></div><p class="hint">这些开关只对软件模拟器生效；真实模式不会伪造硬件响应。</p></article>
+      <article class="panel"><div class="panel-title"><div><span class="step">故障注入</span><h2>模拟异常</h2></div><span class="scope-tag">仅模拟模式</span></div><div class="faults"><label><input id="fault-ir" type="checkbox"> 遮挡红外链路</label><label><input id="fault-485" type="checkbox"> 断开 RS485 路径</label><label><input id="fault-rtc" type="checkbox"> 模拟 RTC 停止推进</label><label><input id="fault-eeprom" type="checkbox"> 模拟 EEPROM 恢复不一致</label></div><p class="hint">用于演示可恢复故障；真实模式不会生成虚拟硬件响应。</p></article>
     </section>
 
     <section class="panel"><div class="panel-title"><div><span class="step">03 / 执行</span><h2>测试尝试与复测历史</h2></div><div class="summary" id="summary">等待运行</div></div><div id="attempt-list" class="attempt-list"><p class="empty">每次失败和复测都会保留为独立 attempt。</p></div></section>
 
     <section class="grid two evidence-grid">
       <article class="panel"><span class="step">04 / 原始证据</span><h2>证据详情</h2><pre id="evidence-panel">选择一个测试项目查看。</pre></article>
-      <article class="panel"><span class="step">05 / 导出</span><h2>交付记录</h2><p>JSON 用于复算，独立 HTML 用于展示或打印。模拟报告会永久带醒目标识。</p><div class="button-row"><button id="export-json" disabled>导出 JSON</button><button id="export-html" disabled>导出 HTML</button></div><div id="status-log" class="log" aria-live="polite">系统就绪。</div></article>
+      <article class="panel"><span class="step">05 / 导出</span><h2>交付记录</h2><p>JSON 用于复算，独立 HTML 用于展示或打印。模拟报告始终保留来源标识。</p><div class="button-row"><button id="export-json" type="button" disabled>导出 JSON</button><button id="export-html" type="button" disabled>导出 HTML</button></div><div id="status-log" class="log" aria-live="polite">系统就绪。</div></article>
     </section>
   </main>
 
-  <footer>协议 v1 · 固件目标 STC15F2K60S2 · 软件通过不等于下板通过</footer>
+  <footer>软件结果仅用于流程验证，正式结论以实际下板记录为准。</footer>
   <script type="module" src="./js/app.js"></script>
 </body>
 </html>
