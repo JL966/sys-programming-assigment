@@ -1,0 +1,43 @@
+﻿{
+    "schemaVersion":  1,
+    "profile":  "EVAL_COMPACT",
+    "createdUtc":  "2026-09-08T10:56:01.7784757Z",
+    "device":  "STC15F2K60S2",
+    "clockHz":  11059200,
+    "codeLimitBytes":  2048,
+    "hardwareValidated":  false,
+    "capabilities":  [
+                         "UART1_2400",
+                         "PROTO24_CRC16",
+                         "ROLE_HELLO"
+                     ],
+    "limitations":  [
+                        "No full session engine",
+                        "No RS485 orchestration",
+                        "No P1 adapters",
+                        "Not a hardware PASS claim"
+                    ],
+    "artifacts":  [
+                      {
+                          "role":  "CTRL",
+                          "path":  "firmware/compact/ctrl/output/AcceptanceCtrlCompact.hex",
+                          "codeBytes":  610,
+                          "hexBytes":  1883,
+                          "sha256":  "6F97D75B4E0B9F7D66ABD236288BA3F92CCA487A22A367F03A9A03ED6124A020"
+                      },
+                      {
+                          "role":  "DUT",
+                          "path":  "firmware/compact/dut/output/AcceptanceDutCompact.hex",
+                          "codeBytes":  610,
+                          "hexBytes":  1883,
+                          "sha256":  "A8DC6CE688E558B1C1BDA042275E25DC7DD83FF65FCE54529B8F38C9118A9B0E"
+                      },
+                      {
+                          "role":  "REF",
+                          "path":  "firmware/compact/ref/output/AcceptanceRefCompact.hex",
+                          "codeBytes":  610,
+                          "hexBytes":  1883,
+                          "sha256":  "85C5098978C98B2B37BC6E21473F2423CE9473E8FF369A6682C26CBF83666E40"
+                      }
+                  ]
+}
