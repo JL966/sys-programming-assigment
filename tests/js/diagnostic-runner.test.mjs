@@ -1,0 +1,8 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {Runner} from '../../web/js/diagnostic-runner.js';import {CMD} from '../../web/js/diagnostic-core.js';
+function mock(fn=()=>[0,0,0,0,0,0,0,0]){return {connected:true,calls:[],async ask(...a){this.calls.push(a);return fn(...a);}};}
+test('missing auxiliary returns untested and safe stops',async()=>{const b=mock();const r=await new Runner(b,null,()=>{},()=>{}).run(15,4);assert.equal(r.status,'UNTESTED');assert(b.calls.some(c=>c[0]===CMD.STOP));assert.equal(b.calls.at(-1)[0],CMD.ROLE);assert(!b.calls.some(c=>c[0]===CMD.START));});
+test('EEPROM persistence failure never writes',async()=>{const b=mock();const r=await new Runner(b,null,()=>{},()=>{throw Error('disk failed');}).run(13,4);assert.equal(r.status,'ABNORMAL');assert(!b.calls.some(c=>c[0]===CMD.START));});
+test('manual approval required for beep',async()=>{const b=mock(c=>c===CMD.STATUS?[0,3,0,0,0,0,0,0]:[0,0,0,0,0,0,0,0]);let n=0;const r=await new Runner(b,null,async()=>++n===1?'开始':'异常',()=>{}).run(7,4);assert.equal(r.status,'ABNORMAL');assert.equal(r.source,'MANUAL');});
+test('cancel before start stays untested',async()=>{const b=mock();let runner;runner=new Runner(b,null,async()=>{runner.cancelled=true;},()=>{});const r=await runner.run(5,4);assert.equal(r.status,'UNTESTED');assert(!b.calls.some(c=>c[0]===CMD.START));});
+test('EEPROM compares both test and restored bytes',async()=>{const b=mock(c=>c===CMD.STATUS?[0,3,0,0,0,0,0,0]:c===CMD.BACKUP?[0,12,86,86,12,0,0,0]:[0,0,0,0,0,0,0,0]);const r=await new Runner(b,null,()=>{},async()=>{}).run(13,4);assert.equal(r.status,'NORMAL');});
