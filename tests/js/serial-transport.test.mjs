@@ -4,9 +4,10 @@ import { SerialTransport } from '../../web/js/serial-transport.js';
 
 function fakeSerial() {
   const state = { writes: [], opened: null, writerReleased: false, readerReleased: false, closed: false };
+  let endRead;
   const reader = {
-    async read() { return { done: true, value: undefined }; },
-    async cancel() {},
+    async read() { return new Promise(resolve => { endRead = resolve; }); },
+    async cancel() { endRead?.({ done: true, value: undefined }); },
     releaseLock() { state.readerReleased = true; }
   };
   const writer = {
@@ -18,6 +19,7 @@ function fakeSerial() {
     async open(options) { state.opened = options; }, async close() { state.closed = true; },
     getInfo() { return { usbVendorId: 0x1A86, usbProductId: 0x7523 }; }
   };
+  state.endRead = () => endRead?.({ done: true, value: undefined });
   return { state, api: { async requestPort() { return port; } } };
 }
 
@@ -43,4 +45,16 @@ test('close releases both Web Serial locks and closes the port', async () => {
 test('missing Web Serial API produces an actionable error', async () => {
   const transport = new SerialTransport({ serial: null });
   await assert.rejects(transport.open(), /Chrome|Edge/);
+});
+
+test('unexpected EOF releases writer and port before disconnect notification', async () => {
+  const fake = fakeSerial();
+  let disconnected = false;
+  const transport = new SerialTransport({ serial: fake.api, frameGapMs: 0, sleep: async () => {} });
+  transport.onDisconnect = () => { disconnected = fake.state.writerReleased && fake.state.closed; };
+  await transport.open();
+  fake.state.endRead();
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.equal(disconnected, true);
+  assert.equal(transport.connected, false);
 });

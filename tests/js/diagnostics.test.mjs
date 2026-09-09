@@ -21,6 +21,15 @@ test('an unreachable node is a blocked precondition instead of a component failu
   assert.equal(result.domain, '节点在线前提');
 });
 
+test('an unsupported hardware profile is explained as a capability gap', () => {
+  const result = diagnoseAttempt({
+    testId: 'T09', verdict: 'BLOCKED', reason: 'PROFILE_UNSUPPORTED',
+    evidence: { required: 'DUT_ULTRA', actual: 3 }
+  });
+  assert.equal(result.level, 'D0');
+  assert.equal(result.domain, '硬件档案');
+});
+
 test('manual output rejection is kept separate from automatic diagnosis', () => {
   const result = diagnoseAttempt({
     testId: 'T11', verdict: 'FAIL', reason: 'USER_REJECTED',

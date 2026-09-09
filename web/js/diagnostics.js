@@ -5,6 +5,9 @@ export function diagnoseAttempt(attempt) {
   if (automation === 'MANUAL' || reason === 'USER_REJECTED') {
     return result('D0', '人工观察', '复核测试图案、声音和操作者记录。', '人工结论不计入自动通过率。');
   }
+  if (reason === 'PROFILE_UNSUPPORTED') {
+    return result('D0', '硬件档案', '切换到包含该模块的 DUT 档案并重新核对 HELLO 能力页。', '当前固件没有声明该测试所需的硬件能力。');
+  }
   if (verdict === 'BLOCKED' || reason === 'NODE_UNREACHABLE') {
     return result('D0', '节点在线前提', '检查供电、USB/485 接线、角色 HELLO 与协议版本。', '前提未成立，不能判定被测器件失败。');
   }

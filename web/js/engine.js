@@ -8,13 +8,15 @@ export class AcceptanceEngine extends EventTarget {
   #active = false;
   #generation = 0;
   #attempt = 0;
+  #persistRun;
 
-  constructor({ transport, mode = 'REAL', thresholds = {} }) {
+  constructor({ transport, mode = 'REAL', thresholds = {}, persistRun = async () => {} }) {
     super();
     if (!transport) throw new TypeError('transport is required');
     this.#transport = transport;
     this.mode = mode;
     this.thresholds = Object.freeze({ ...thresholds });
+    this.#persistRun = persistRun;
     this.currentRun = null;
   }
 
@@ -27,7 +29,7 @@ export class AcceptanceEngine extends EventTarget {
     this.#active = true;
     const generation = ++this.#generation;
     const run = {
-      uuid: makeUuid(), planId, mode: this.mode, source: this.mode,
+      uuid: makeUuid(), planId, testIds: [...testIds], mode: this.mode, source: this.mode,
       startedAt: new Date().toISOString(), endedAt: null, status: 'RUNNING',
       config: { thresholds: this.thresholds }, nodes: {}, attempts: []
     };
@@ -55,14 +57,17 @@ export class AcceptanceEngine extends EventTarget {
       runUuid: run.uuid, attempt: attemptNumber, thresholds: this.thresholds, nodes: run.nodes
     });
     if (generation !== this.#generation) return null;
+    const { releaseResult, ...result } = raw;
     const attempt = {
       attempt: attemptNumber, parentAttempt: null, testId,
       title: definition.title, automation: definition.automation,
-      destructive: definition.destructive, ...raw
+      destructive: definition.destructive, ...result
     };
     attempt.diagnosis = diagnoseAttempt(attempt);
     run.attempts.push(attempt);
     this.dispatchEvent(new CustomEvent('attempt', { detail: attempt }));
+    await this.#persistRun(run);
+    if (releaseResult) await releaseResult();
     return attempt;
   }
 
@@ -90,6 +95,7 @@ export class AcceptanceEngine extends EventTarget {
       this.currentRun.status = 'ABORTED';
       this.currentRun.endedAt = new Date().toISOString();
     }
+    Promise.resolve(this.#transport.cancel?.()).catch(() => {});
     return true;
   }
 }

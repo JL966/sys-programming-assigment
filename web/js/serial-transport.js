@@ -15,6 +15,7 @@ export class SerialTransport {
     this.frameGapMs = frameGapMs;
     this.sleep = sleep;
     this.onBytes = onBytes;
+    this.onDisconnect = () => {};
   }
 
   get connected() { return Boolean(this.#port); }
@@ -31,6 +32,7 @@ export class SerialTransport {
   }
 
   async #readLoop() {
+    let disconnectError = null;
     this.#reader = this.#port.readable.getReader();
     try {
       while (!this.#closing) {
@@ -38,9 +40,19 @@ export class SerialTransport {
         if (done) break;
         if (value?.length) this.onBytes(Uint8Array.from(value));
       }
+    } catch (error) {
+      disconnectError = error;
     } finally {
       this.#reader.releaseLock();
       this.#reader = null;
+      if (!this.#closing) {
+        const port = this.#port;
+        this.#closing = true;
+        if (this.#writer) { this.#writer.releaseLock(); this.#writer = null; }
+        this.#port = null;
+        await port?.close().catch(() => {});
+        this.onDisconnect(disconnectError || new Error('serial disconnected'));
+      }
     }
   }
 

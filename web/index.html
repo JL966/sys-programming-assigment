@@ -26,12 +26,13 @@
       <div><span class="step">01 / 连接与计划</span><h2>新建验收任务</h2><p>选择测试计划后开始执行。模拟模式可注入异常，用于检查失败定位与复测流程。</p></div>
       <div class="controls">
         <label>测试计划<select id="plan-select"><option value="1">01 快速核心 · 5 项</option><option value="2">02 常规覆盖 · 11 项</option><option value="3">03 通信统计</option><option value="4">04 传感器</option><option value="5">05 输出人工</option></select></label>
+        <label class="write-gate"><input id="write-authorization" type="checkbox" disabled> 本轮授权 EEPROM 受控备份、测试与恢复</label>
         <div class="button-row"><button id="start-button" class="primary" type="button">开始验收</button><button id="cancel-button" type="button" disabled>取消</button></div>
       </div>
     </section>
 
     <section class="grid two">
-      <article class="panel"><div class="panel-title"><div><span class="step">02 / 节点</span><h2>角色与前提</h2></div><span id="node-count" class="pill">未预检</span></div><div id="node-grid" class="node-grid"><p class="empty">开始后显示 CTRL / DUT / REF 的角色、板号、固件和档案。</p></div></article>
+      <article class="panel"><div class="panel-title"><div><span class="step">02 / 节点</span><h2>角色与前提</h2></div><span id="node-count" class="pill">未预检</span></div><div id="serial-connections" class="serial-connections" hidden><button type="button" data-connect="CTRL">连接 CTRL</button><button type="button" data-connect="DUT">连接 DUT</button><button type="button" data-connect="REF">连接 REF</button></div><div id="node-grid" class="node-grid"><p class="empty">真实模式需分别核对 CTRL / DUT / REF；模拟模式开始后显示虚拟节点。</p></div></article>
       <article class="panel"><div class="panel-title"><div><span class="step">故障注入</span><h2>模拟异常</h2></div><span class="scope-tag">仅模拟模式</span></div><div class="faults"><label><input id="fault-ir" type="checkbox"> 遮挡红外链路</label><label><input id="fault-485" type="checkbox"> 断开 RS485 路径</label><label><input id="fault-rtc" type="checkbox"> 模拟 RTC 停止推进</label><label><input id="fault-eeprom" type="checkbox"> 模拟 EEPROM 恢复不一致</label></div><p class="hint">用于演示可恢复故障；真实模式不会生成虚拟硬件响应。</p></article>
     </section>
 

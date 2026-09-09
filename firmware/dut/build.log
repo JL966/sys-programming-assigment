@@ -1,12 +1,8 @@
 Build target 'AcceptanceDut'
-compiling main.c...
-compiling firmware_app.c...
+compiling test_engine.c...
 linking...
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
-    SEGMENT: ?PR?_RECORDSTORE_SAVE?RECORDS
-
-*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
-    SEGMENT: ?PR?_RECORDSTORE_READCHUNK?RECORDS
+    SEGMENT: ?PR?_RECORDSTORE_WIRELENGTH?RECORDS
 
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?GETULTRASONIC?SYS
@@ -23,6 +19,6 @@ linking...
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?CLRBEEPPIN?SYS
 
-Program Size: data=94.7 xdata=539 code=9451
+Program Size: data=122.7 xdata=547 code=12085
 creating hex file from ".\output\AcceptanceDut"...
-".\output\AcceptanceDut" - 0 Error(s), 7 Warning(s).
+".\output\AcceptanceDut" - 0 Error(s), 6 Warning(s).

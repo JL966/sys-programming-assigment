@@ -30,6 +30,7 @@ static ProtoFrame xdata request_frame;
 static ProtoFrame xdata response_frame;
 static unsigned char xdata encoded_frame[PROTO_FRAME_SIZE];
 static unsigned short rx_overflow;
+static unsigned short attempt_ticks;
 static struct_SysPerF performance;
 
 static void copy24(unsigned char *dst, const unsigned char *src)
@@ -102,17 +103,17 @@ static void on_uart2(void)
     }
 }
 
-static void enrich_hello(ProtoFrame *response)
+static void enrich_hello(const ProtoFrame *request, ProtoFrame *response)
 {
     response->payload_len = 8u;
     response->payload[0] = CMD_OK;
     response->payload[1] = APP_ROLE;
-    response->payload[2] = APP_PROFILE;
-    response->payload[3] = APP_FW_MAJOR;
-    response->payload[4] = APP_FW_MINOR;
-    response->payload[5] = APP_CAP_LOW;
-    response->payload[6] = APP_CAP_HIGH;
-    response->payload[7] = PROTO_VERSION;
+    response->payload[2] = PROTO_VERSION;
+    response->payload[3] = request->step == 1u ? APP_CAP_LOW : APP_FW_MAJOR;
+    response->payload[4] = request->step == 1u ? APP_CAP_HIGH : APP_FW_MINOR;
+    response->payload[5] = APP_PROFILE;
+    response->payload[6] = APP_ROLE;
+    response->payload[7] = 0u;
 }
 
 static void process_one(unsigned char *wire, TxSlot *active, TxSlot *waiting)
@@ -120,7 +121,7 @@ static void process_one(unsigned char *wire, TxSlot *active, TxSlot *waiting)
     if (Proto_Decode(wire, APP_ROLE, 0u, &request_frame) != PROTO_OK) return;
     Engine_HandleFrame(&engine, &request_frame, &response_frame);
     if (request_frame.msg_type == PROTO_MSG_HELLO && response_frame.payload[0] == CMD_OK)
-        enrich_hello(&response_frame);
+        enrich_hello(&request_frame, &response_frame);
     if (Proto_Encode(&response_frame, encoded_frame) == PROTO_OK)
         queue_frame(active, waiting, encoded_frame);
 }
@@ -136,6 +137,12 @@ static void on_10ms(void)
         process_one(uart2_pending, &uart2_active, &uart2_waiting);
     }
     Engine_Tick10ms(&engine);
+    if (engine.phase == ENGINE_RUNNING && engine.current_test != 0u && !engine.waiting_human) {
+        attempt_ticks++;
+        if (attempt_ticks >= 10u)
+            Engine_CompleteAttempt(&engine, VERDICT_INCONCLUSIVE, REASON_EVIDENCE_GAP,
+                                   (unsigned long)attempt_ticks * 10ul, 0u, 0u);
+    } else if (engine.phase != ENGINE_RUNNING) attempt_ticks = 0u;
     flush_uart1();
     flush_uart2();
 }
@@ -166,6 +173,7 @@ void App_Init(void)
     uart1_active.valid = uart1_waiting.valid = 0u;
     uart2_active.valid = uart2_waiting.valid = 0u;
     rx_overflow = 0u;
+    attempt_ticks = 0u;
     Engine_Init(&engine, APP_ROLE);
     DisplayerInit();
     SetDisplayerArea(0, 7);

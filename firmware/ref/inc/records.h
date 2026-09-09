@@ -19,5 +19,7 @@ unsigned char RecordStore_Save(RecordStore *store, unsigned char kind,
                                const unsigned char *body, unsigned short length);
 unsigned char RecordStore_ReadChunk(const RecordStore *store, unsigned char chunk_index,
                                     unsigned char out[RECORD_CHUNK_DATA_SIZE]);
+unsigned char RecordStore_Release(RecordStore *store, unsigned short record_id);
+unsigned short RecordStore_WireLength(const RecordStore *store);
 
 #endif

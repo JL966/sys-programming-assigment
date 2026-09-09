@@ -1,11 +1,11 @@
 # 软件验证记录
 
-日期：2026-09-08
+日期：2026-09-09
 
 ## 已通过
 
 - C 协议、会话/状态机、检查点/判定规则：3 个独立测试程序通过。
-- JavaScript：23 项 Node 测试通过。
+- JavaScript：44 项协议、引擎、真实客户端、连接管理、记录编解码、虚拟三板、存储和报告测试全部通过。
 - 所有 `web/js/*.js` 通过语法检查。
 - 页面必需结构和固件静态约束检查通过。
 - 浏览器模拟闭环：快速核心计划可运行；红外故障生成 FAIL 和“红外链路”诊断；清除故障后复测生成新的 PASS attempt，旧 FAIL 证据仍保留。
@@ -68,3 +68,15 @@ REF   Program Size: data=94.7 xdata=539 code=9450   0 Error(s)
 - HELLO 层已通过；RS485 双板/三板、红外、RTC、EEPROM、传感器等 G1/G2/G3 项尚未执行。
 - IR、RTC、ADC、EEPROM 的 P1 规则和纯逻辑已实现并测试，但尚未依据实际板卡档案接入 G4 固件。
 - 所有需要人工或实物确认的记录保持未勾选；模拟数据不得用于证明实板通过。
+
+## 2026-09-09 代码闭环增量
+
+- 新增 `ProtocolClient`：严格事务匹配、只读同序号重试、动作不自动重放、断线拒绝 pending。
+- 新增 CTRL/DUT/REF 连接管理和真实 Web Serial UI；HELLO 统一为角色、协议、固件、档案、板号身份页。
+- 新增记录 envelope（schema/kind/length/body CRC）、结果 body、四字节分片读取与持久化后释放。
+- 新增 `RealRig` 和真实 24 字节帧驱动的 `VirtualBoard`，快速核心、故障、权限关闭、人工无法确认均有端到端测试。
+- 固件状态机补齐 GET_STATUS、CONFIG_WRITE/COMMIT、READ_RECORD、RELEASE_RESULT、RENEW_LEASE、HUMAN_CONFIRM、LINK_CHALLENGE，以及取消/租约过期记录；尚无实测适配器证据时一律产生 `INCONCLUSIVE / EVIDENCE_GAP`。
+- EEPROM 授权默认关闭，配置按键序规范化并现场计算 CRC；未授权的 T05 在板端和 PC 端双重拒绝。
+- 浏览器实测模拟故障闭环、真实模式空态与来源隔离；390 px 视口 `scrollWidth == clientWidth`，控制台 0 error。
+
+本轮 Keil 结果：DUT 为 `data=122.7, xdata=547, code=12085`，REF 为 `data=122.7, xdata=547, code=12078`，均 `0 Error(s)` 并生成新 HEX；CTRL 完成最新源码编译和布局（`data=122.7, xdata=547, code=12078, 0 ERROR(S)`），但本机 BL51 仅对 CTRL 报 `FATAL ERROR L250`。因此仓库中的 CTRL HEX 仍是 2026-09-08 版本，不能与本轮 DUT/REF HEX 组成新的可发布三件套，发布清单暂不刷新。

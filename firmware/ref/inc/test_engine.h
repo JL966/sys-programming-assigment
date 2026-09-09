@@ -26,7 +26,13 @@ typedef struct TestEngineTag {
     unsigned short current_attempt;
     unsigned short lease_ticks;
     unsigned short action_count;
+    unsigned short config_crc;
+    unsigned char last_config_key;
+    unsigned char eeprom_write_authorized;
+    unsigned char waiting_human;
     unsigned short last_seq;
+    unsigned short last_session;
+    unsigned char last_src;
     unsigned char last_type;
     CommandStatus last_status;
     unsigned char has_last;
@@ -36,5 +42,8 @@ void Engine_Init(TestEngine *engine, unsigned char role);
 CommandStatus Engine_HandleFrame(TestEngine *engine, const ProtoFrame *request,
                                  ProtoFrame *response);
 void Engine_Tick10ms(TestEngine *engine);
+CommandStatus Engine_CompleteAttempt(TestEngine *engine, TestVerdict verdict,
+                                     ReasonCode reason, unsigned long duration_ms,
+                                     unsigned short valid, unsigned short errors);
 
 #endif

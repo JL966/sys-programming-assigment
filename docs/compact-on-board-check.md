@@ -125,4 +125,4 @@ HELLO 挑战: 100/100 首次正确响应
   powershell -ExecutionPolicy Bypass -File scripts\verify-all.ps1
   ```
   然后按 `docs/on-board-validation.md` 做 G1（单板）、G2（双板到三板 485）、G3（核心测试项）。
-- 网页的“真实串口诊断”目前只是占位（`web/js/app.js` 在非模拟模式直接返回提示，没有接 Web Serial），所以真实下板验证请用本手册的脚本或串口助手；GUI 接真实串口属于后续开发项。
+- 网页的“真实串口诊断”已接入 Web Serial、三角色 HELLO 核验、会话、记录回读与报告；Compact 固件仍只支持 HELLO，因此 Compact 下板继续使用本手册脚本，完整计划需烧录同一源码版本的三份完整 HEX。
