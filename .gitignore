@@ -29,3 +29,8 @@ tests/bin/
 
 # Optional local worktrees
 .worktrees/
+
+# Local historical material and build evidence (not part of the product)
+.local-history/
+firmware/diagnostic/build.log
+firmware/diagnostic/list/

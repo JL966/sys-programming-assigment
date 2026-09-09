@@ -1,4 +1,0 @@
-#ifndef ACCEPTANCE_COMPACT_ROLE_H
-#define ACCEPTANCE_COMPACT_ROLE_H
-#define APP_ROLE 2
-#endif
