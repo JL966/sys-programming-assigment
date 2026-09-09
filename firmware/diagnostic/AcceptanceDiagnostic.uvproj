@@ -435,6 +435,8 @@
               <FileType>4</FileType>
               <FilePath>.\source\STCBSP_V3.6.LIB</FilePath>
             </File>
+            <File><FileName>extension.c</FileName><FileType>1</FileType><FilePath>.\source\extension.c</FilePath></File>
+            <File><FileName>rfid_readonly.c</FileName><FileType>1</FileType><FilePath>.\source\rfid_readonly.c</FilePath></File>
           </Files>
         </Group>
       </Groups>

@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include "diagnostic-bsp-stub.h"
 #include "diag.h"
+#include "extension.h"
+extern unsigned char pwm1,pwm2,step_status;
+extern int ultrasonic,decode_delta;
 unsigned long uptime;unsigned int lease;static int writes=0,mem=33,bad_restore=0;
 static void(*callbacks[6])(void);static unsigned char keys[3],navs[6],hall_action,vib_action,*ir_buffer;static int digits[8],ir_count,ir_ok=2;static unsigned char ir_packet[8];
 unsigned int Crc(unsigned char*p,unsigned char n){unsigned int c=65535;int i,j;for(i=0;i<n;i++){c^=p[i];for(j=0;j<8;j++)c=c&1?(c>>1)^0xa001:c>>1;}return c;}
@@ -13,7 +16,7 @@ struct_ADC GetADC(void){struct_ADC a={0,0,500,400,0};return a;}struct_DS1302_RTC
 unsigned char M24C02_Read(int a){return mem;}void M24C02_Write(int a,int v){writes++;mem=bad_restore&&v==33?44:v;}
 void IrInit(int a){}void SetIrRxd(void*a,int n){ir_buffer=a;}int GetIrRxNum(void){return ir_count;}int GetIrStatus(void){return 0;}int IrPrint(void*p,int n){int i;for(i=0;i<8;i++)ir_packet[i]=((unsigned char*)p)[i];return ir_ok;}
 void Uart2Init(int a,int b){}void SetUart2Rxd(void*a,int n,void*b,int l){}int GetUart2TxStatus(void){return 0;}void Uart2Print(void*p,int n){}
-int main(void){unsigned char p[8]={33},out[7];int i;HardwareInit();assert(HardwarePrepare(17));assert(!HardwarePrepare(13));assert(evidence[0]==33);assert(!HardwareStart(0,p));assert(writes==1);HardwareSafe();for(i=0;i<90;i++)HardwareTick();assert(mem==33);assert(writes==2);HardwareStart(0,p);assert(writes==2);
+int main(void){unsigned char p[8]={33},out[7];int i;HardwareInit();assert(HardwarePrepare(25));assert(!HardwarePrepare(13));assert(evidence[0]==33);assert(!HardwareStart(0,p));assert(writes==1);HardwareSafe();for(i=0;i<90;i++)HardwareTick();assert(mem==33);assert(writes==2);HardwareStart(0,p);assert(writes==2);
  assert(!HardwarePrepare(5));assert(!HardwareStart(2,p));navs[enumAdcNavKey3]=enumKeyPress;callbacks[enumEventNav]();navs[enumAdcNavKey3]=enumKeyRelease;callbacks[enumEventNav]();HardwareSnapshot(out);assert(out[0]&&out[1]&&!out[2]);
  HardwareSafe();assert(!HardwareRole(2));assert(digits[6]==0&&digits[7]==2);
  assert(!HardwarePrepare(9));HardwareStart(0,p);uptime=10;HardwareTick();assert(digits[5]==4&&digits[6]==0&&digits[7]==0);
@@ -26,4 +29,8 @@ int main(void){unsigned char p[8]={33},out[7];int i;HardwareInit();assert(Hardwa
  callbacks[enumEventIrRxd]();HardwareLinkDetails(out);assert(out[0]==1);
  HardwareStart(ARM,p);HardwareSnapshot(out);assert(!out[0]);ir_count=3;callbacks[enumEventIrRxd]();HardwareLinkDetails(out);assert(out[3]==1);
  ir_ok=3;assert(HardwareStart(SEND,p)==3);
+ assert(!HardwarePrepare(20));HardwareStart(0,p);HardwareTick();assert(pwm1==30&&pwm2==0);for(i=1;i<400;i++)HardwareTick();HardwareTick();assert(pwm1==70);HardwareSafe();assert(pwm1==0&&pwm2==0);
+ assert(!HardwarePrepare(17));HardwareStart(0,p);for(i=0;i<2200;i++)HardwareTick();assert(phase==3&&step_status==0);HardwareSafe();
+ assert(!HardwarePrepare(19));HardwareStart(0,p);for(i=0;i<20;i++)HardwareTick();ExtensionSnapshot(0,out);assert(out[0]==100&&out[6]==1&&digits[0]==10);assert(ExtensionSnapshot(1,out)==1);HardwareSafe();
+ assert(!HardwarePrepare(23));HardwareStart(0,p);decode_delta=2;for(i=0;i<20;i++)HardwareTick();decode_delta=-3;for(i=0;i<20;i++)HardwareTick();ExtensionSnapshot(0,out);assert(out[0]==5&&out[2]==3);HardwareSafe();
  p[0]=33;assert(!HardwarePrepare(13));bad_restore=1;HardwareStart(0,p);for(i=0;i<90;i++)HardwareTick();assert(hw_error==7);assert(HardwarePrepare(13)==4);puts("PASS: EEPROM restore/cancel/idempotency/lockout and ADC K3 events");return 0;}

@@ -12,6 +12,13 @@ enum{enumAdcNavKey3,enumAdcNavKeyRight,enumAdcNavKeyDown,enumAdcNavKeyCenter,enu
 enum{enumHallNull,enumHallGetClose,enumHallGetAway};
 enum{enumEventKey,enumEventNav,enumEventHall,enumEventVib,enumEventUart2Rxd,enumEventIrRxd};
 #define ADCexpEXT 0x98
+#define ADCincEXT 0x9b
+enum {enumEXTWeight,enumEXTPWM,enumEXTDecode,enumEXTUltraSonic};
+enum {enumStepMotor1,enumStepMotor2,enumStepMotor3};
+enum {enumStepMotorFree,enumStepMotorBusy,enumSetStepMotorOK,enumSetStepMotorFail};
+void EXTInit(char);void SetPWM(unsigned char,unsigned char,unsigned char,unsigned char);int GetWeight(void);int GetDecode(void);int GetUltraSonic(void);
+void StepMotorInit(void);char SetStepMotor(char,unsigned char,int);int EmStop(char);unsigned char GetStepMotorStatus(char);
+unsigned char rd(unsigned char);void wr(unsigned char,unsigned char);
 #define NEC_R05d 43
 #define enumIrFree 0
 #define enumUart2TxFree 0

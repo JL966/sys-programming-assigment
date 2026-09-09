@@ -16,6 +16,7 @@
 #include "IR.h"
 #endif
 #include "diag.h"
+#include "extension.h"
 unsigned char xdata current_test,phase,hw_error;
 unsigned int xdata age;
 unsigned char xdata evidence[7];
@@ -47,6 +48,7 @@ static int temperature(unsigned int a){
 }
 void HardwareSafe(void){
     if(ee_state){safe_pending=1;return;}
+    ExtensionSafe();
     started=0;phase=0;blank();idle();
     /* BSP tones are bounded to 200 ms; never queue another after cancellation. */
     if(fm_ready){fm.volume=0;SetFMRadio(fm);}
@@ -89,7 +91,7 @@ void HardwareInit(void){
 }
 unsigned char HardwarePrepare(unsigned char id){
     unsigned char i;
-    if(id<1 || id>16)return 1;
+    if(id<1 || id>24)return 1;
     if(ee_state)return 3;
     HardwareSafe();current_test=id;phase=1;hw_error=0;age=0;last_step=255;safe_pending=0;
     for(i=0;i<7;i++)evidence[i]=0;
@@ -98,11 +100,13 @@ unsigned char HardwarePrepare(unsigned char id){
     if(id>=15){match_bits[0]=0;match_bits[1]=0;}
     if(id==15){SetIrRxd(link_rx,8);SetEventCallBack(enumEventIrRxd,ir_received);}
     if(id==16){Uart2Init(1200,Uart2Usedfor485);SetUart2Rxd(link_rx,8,link_head,2);}
+    if(id>=17)ExtensionPrepare(id);
     return 0;
 }
 unsigned char HardwareStart(unsigned char step,unsigned char *p){
     unsigned char i;unsigned int c;
     if(ee_state)return 3;
+    if(current_test>=17){started=1;return ExtensionStart(step,p);}
     if(step==last_step && current_test<15)return 0;
     if(current_test==13 && (ee_lock || last_step!=255))return 4;
     if(current_test==13 && p[0]!=evidence[0])return 5;
@@ -141,6 +145,7 @@ unsigned char HardwareStart(unsigned char step,unsigned char *p){
 }
 void HardwareTick(void){
     unsigned char v,i,n;int t;
+    if(current_test>=17){ExtensionTick();return;}
     if(ee_state){
         age++;
         if(ee_state==1 && age>=30){display_stage=3;number(3);evidence[2]=M24C02_Read(0x7f);ee_state=3;age=0;}
@@ -157,7 +162,7 @@ void HardwareTick(void){
         if(current_test==8){t=temperature(adc_rt);if(t==-999)Seg7Print(10,10,10,10,17,17,17,17);else if(t<0)Seg7Print(10,10,10,10,10,17,10,-t);else number(t);}
         if(current_test==9)number(adc_ro);
         if(current_test==12){rtc=RTC_Read();Seg7Print(rtc.hour>>4,rtc.hour&15,17,rtc.minute>>4,rtc.minute&15,17,rtc.second>>4,rtc.second&15);}
-        if(current_test>=15){n=0;for(i=0;i<5;i++)if(match_bits[pair_direction]&(1<<i))n++;Seg7Print(10,10,10,10,pair_direction+1,10,10,n);}
+        if(current_test==15||current_test==16){n=0;for(i=0;i<5;i++)if(match_bits[pair_direction]&(1<<i))n++;Seg7Print(10,10,10,10,pair_direction+1,10,10,n);}
     }
     if(age<60000)age++;
     if(current_test==3){v=(unsigned char)(age/70);if(v!=display_stage){display_stage=v;if(v<8)LedPrint(1<<v);else if(v==8)LedPrint(255);else LedPrint(0);}if(v>=10){phase=3;started=0;}}

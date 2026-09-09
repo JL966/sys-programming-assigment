@@ -1,5 +1,7 @@
 # 统一诊断协议（固件2.1.1，帧version=2）
 
+> 本文件保留1～16协议基础说明；当前交付版本为2.2.0。HELLO版本、能力字节以及17～24扩展定义以[extension-v2.2.md](extension-v2.2.md)为准。
+
 ## 基本帧
 
 固定24字节：A5 5A | version | command | src | dst | attempt(2) | seq(2) | test | step | length | flags | payload(8) | CRC(2)。多字节字段小端；CRC-16/MODBUS覆盖索引2～21。请求src=0,dst=1,flags=0,length=8；响应command=request|0x80,src=1,dst=0,flags=1。两块板通过不同USB串口区分，不使用永久地址区分。

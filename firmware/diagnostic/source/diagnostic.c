@@ -2,6 +2,7 @@
 #include "sys.H"
 #include "uart1.h"
 #include "diag.h"
+#include "extension.h"
 static unsigned char xdata rx[24], pending[24], tx[24], cache[24], previous[24];
 static unsigned char xdata head[2]={0xa5,0x5a};
 static unsigned char xdata ready, tx_state, cached;
@@ -31,9 +32,9 @@ static void command(void) {
     for(i=14;i<22;i++)tx[i]=0;
     a=(unsigned int)pending[6]|((unsigned int)pending[7]<<8);
     if(pending[3]==HELLO){
-        tx[15]=2;tx[16]=1;tx[17]=1;
+        tx[15]=2;tx[16]=2;tx[17]=0;
         tx[18]=(unsigned char)uptime;tx[19]=(unsigned char)(uptime>>8);tx[20]=(unsigned char)(uptime>>16);tx[21]=(unsigned char)(uptime>>24);
-    }else if(pending[3]==2){tx[15]=255;tx[16]=255;tx[17]=1;
+    }else if(pending[3]==2){tx[15]=255;tx[16]=255;tx[17]=255;
     }else if(pending[3]==ROLE){err=HardwareRole(pending[14]);
     }else if(pending[3]==PROGRESS){err=HardwareProgress(pending[14]);
     }else if(pending[3]==PREPARE){
@@ -43,7 +44,7 @@ static void command(void) {
     else if(a!=attempt || pending[10]!=current_test)err=2;
     else if(pending[3]==START)err=HardwareStart(pending[11],pending+14);
     else if(pending[3]==STATUS){tx[15]=phase;tx[16]=hw_error;tx[17]=(unsigned char)age;tx[18]=(unsigned char)(age>>8);tx[19]=display_stage;}
-    else if(pending[3]==SNAPSHOT){if(pending[11]==1 && current_test>=15)HardwareLinkDetails(tx+15);else HardwareSnapshot(tx+15);}
+    else if(pending[3]==SNAPSHOT){if(current_test>=17)err=ExtensionSnapshot(pending[11],tx+15);else if(pending[11]==1 && (current_test==15||current_test==16))HardwareLinkDetails(tx+15);else HardwareSnapshot(tx+15);}
     else if(pending[3]==BACKUP){for(i=0;i<7;i++)tx[15+i]=evidence[i];}
     else if(pending[3]==ARM || pending[3]==SEND){
         if(current_test!=15 && current_test!=16)err=1;
