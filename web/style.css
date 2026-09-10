@@ -134,3 +134,4 @@ pre { max-height: 220px; padding: 12px; overflow: auto; border-radius: 6px; back
   .test-layout:has(aside:not([hidden])) { grid-template-columns: 1fr; }
   .result-actions button { flex: 1 1 auto; }
 }
+#steps.plain-steps{list-style:none;padding-left:0}#steps.plain-steps li{margin:8px 0}

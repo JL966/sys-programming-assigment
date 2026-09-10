@@ -81,6 +81,7 @@ static void ir_received(void){unsigned char n=GetIrRxNum();if(!started||current_
 void HardwareLinkDetails(unsigned char *p){unsigned char i;for(i=0;i<7;i++)p[i]=link_details[i];p[4]=(unsigned char)pair_trial;p[5]=pair_direction;p[6]=current_test==15?GetIrStatus():GetUart2TxStatus();}
 void HardwareInit(void){
     unsigned char i;
+    ExtensionInit();
     current_test=0;phase=0;hw_error=0;age=0;pair_token=0;pair_trial=0;pair_direction=0;
     started=0;pressed=0;released=0;wrong=0;hall_bits=0;vib_count=0;ee_state=0;ee_lock=0;safe_pending=0;fm_ready=0;sample_id=0;adc_rt=0;adc_ro=0;
     for(i=0;i<7;i++)evidence[i]=0;
@@ -91,7 +92,7 @@ void HardwareInit(void){
 }
 unsigned char HardwarePrepare(unsigned char id){
     unsigned char i;
-    if(id<1 || id>24)return 1;
+    if(id<1 || id>23)return 1;
     if(ee_state)return 3;
     HardwareSafe();current_test=id;phase=1;hw_error=0;age=0;last_step=255;safe_pending=0;
     for(i=0;i<7;i++)evidence[i]=0;
@@ -106,7 +107,7 @@ unsigned char HardwarePrepare(unsigned char id){
 unsigned char HardwareStart(unsigned char step,unsigned char *p){
     unsigned char i;unsigned int c;
     if(ee_state)return 3;
-    if(current_test>=17){started=1;return ExtensionStart(step,p);}
+    if(current_test>=17){i=ExtensionStart(step,p);if(!i)started=1;return i;}
     if(step==last_step && current_test<15)return 0;
     if(current_test==13 && (ee_lock || last_step!=255))return 4;
     if(current_test==13 && p[0]!=evidence[0])return 5;

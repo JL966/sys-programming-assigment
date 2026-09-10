@@ -13,6 +13,7 @@ enum{enumHallNull,enumHallGetClose,enumHallGetAway};
 enum{enumEventKey,enumEventNav,enumEventHall,enumEventVib,enumEventUart2Rxd,enumEventIrRxd};
 #define ADCexpEXT 0x98
 #define ADCincEXT 0x9b
+extern unsigned char P1,P1M0,P1M1,CCAPM1,EXTmodel;
 enum {enumEXTWeight,enumEXTPWM,enumEXTDecode,enumEXTUltraSonic};
 enum {enumStepMotor1,enumStepMotor2,enumStepMotor3};
 enum {enumStepMotorFree,enumStepMotorBusy,enumSetStepMotorOK,enumSetStepMotorFail};

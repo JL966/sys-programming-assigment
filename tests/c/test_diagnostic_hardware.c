@@ -12,11 +12,12 @@ void DisplayerInit(void){}void SetDisplayerArea(int a,int b){}void KeyInit(void)
 void SetEventCallBack(int e,void(*f)(void)){callbacks[e]=f;}void LedPrint(int v){}void Seg7Print(int a,int b,int c,int d,int e,int f,int g,int h){digits[0]=a;digits[1]=b;digits[2]=c;digits[3]=d;digits[4]=e;digits[5]=f;digits[6]=g;digits[7]=h;}void SetBeep(int f,int t){}
 unsigned char GetKeyAct(int i){int v=keys[i];keys[i]=0;return v;}unsigned char GetAdcNavAct(int i){int v=navs[i];navs[i]=0;return v;}unsigned char GetHallAct(void){int a=hall_action;hall_action=0;return a;}unsigned char GetVibAct(void){int a=vib_action;vib_action=0;return a;}
 void SetFMRadio(struct_FMRadio f){}void FMRadioInit(struct_FMRadio f){}struct_FMRadio GetFMRadio(void){struct_FMRadio f={955,6,0,0,0};return f;}
-struct_ADC GetADC(void){struct_ADC a={0,0,500,400,0};return a;}struct_DS1302_RTC RTC_Read(void){struct_DS1302_RTC t={0,0,0,1,1,1,0x26};return t;}void DS1302Init(struct_DS1302_RTC t){}
+static unsigned int ext10=0,ext11=0;
+struct_ADC GetADC(void){struct_ADC a={ext10,ext11,500,400,0};return a;}struct_DS1302_RTC RTC_Read(void){struct_DS1302_RTC t={0,0,0,1,1,1,0x26};return t;}void DS1302Init(struct_DS1302_RTC t){}
 unsigned char M24C02_Read(int a){return mem;}void M24C02_Write(int a,int v){writes++;mem=bad_restore&&v==33?44:v;}
 void IrInit(int a){}void SetIrRxd(void*a,int n){ir_buffer=a;}int GetIrRxNum(void){return ir_count;}int GetIrStatus(void){return 0;}int IrPrint(void*p,int n){int i;for(i=0;i<8;i++)ir_packet[i]=((unsigned char*)p)[i];return ir_ok;}
 void Uart2Init(int a,int b){}void SetUart2Rxd(void*a,int n,void*b,int l){}int GetUart2TxStatus(void){return 0;}void Uart2Print(void*p,int n){}
-int main(void){unsigned char p[8]={33},out[7];int i;HardwareInit();assert(HardwarePrepare(25));assert(!HardwarePrepare(13));assert(evidence[0]==33);assert(!HardwareStart(0,p));assert(writes==1);HardwareSafe();for(i=0;i<90;i++)HardwareTick();assert(mem==33);assert(writes==2);HardwareStart(0,p);assert(writes==2);
+int main(void){unsigned char p[8]={33},out[7];int i;HardwareInit();assert(HardwarePrepare(24));assert(!HardwarePrepare(13));assert(evidence[0]==33);assert(!HardwareStart(0,p));assert(writes==1);HardwareSafe();for(i=0;i<90;i++)HardwareTick();assert(mem==33);assert(writes==2);HardwareStart(0,p);assert(writes==2);
  assert(!HardwarePrepare(5));assert(!HardwareStart(2,p));navs[enumAdcNavKey3]=enumKeyPress;callbacks[enumEventNav]();navs[enumAdcNavKey3]=enumKeyRelease;callbacks[enumEventNav]();HardwareSnapshot(out);assert(out[0]&&out[1]&&!out[2]);
  HardwareSafe();assert(!HardwareRole(2));assert(digits[6]==0&&digits[7]==2);
  assert(!HardwarePrepare(9));HardwareStart(0,p);uptime=10;HardwareTick();assert(digits[5]==4&&digits[6]==0&&digits[7]==0);
@@ -29,8 +30,15 @@ int main(void){unsigned char p[8]={33},out[7];int i;HardwareInit();assert(Hardwa
  callbacks[enumEventIrRxd]();HardwareLinkDetails(out);assert(out[0]==1);
  HardwareStart(ARM,p);HardwareSnapshot(out);assert(!out[0]);ir_count=3;callbacks[enumEventIrRxd]();HardwareLinkDetails(out);assert(out[3]==1);
  ir_ok=3;assert(HardwareStart(SEND,p)==3);
- assert(!HardwarePrepare(20));HardwareStart(0,p);HardwareTick();assert(pwm1==30&&pwm2==0);for(i=1;i<400;i++)HardwareTick();HardwareTick();assert(pwm1==70);HardwareSafe();assert(pwm1==0&&pwm2==0);
+ assert(!HardwarePrepare(19));HardwareStart(0,p);HardwareTick();assert(pwm1==30&&pwm2==0);for(i=1;i<400;i++)HardwareTick();HardwareTick();assert(pwm1==70);HardwareSafe();assert(pwm1==0&&pwm2==0);
  assert(!HardwarePrepare(17));HardwareStart(0,p);for(i=0;i<2200;i++)HardwareTick();assert(phase==3&&step_status==0);HardwareSafe();
- assert(!HardwarePrepare(19));HardwareStart(0,p);for(i=0;i<20;i++)HardwareTick();ExtensionSnapshot(0,out);assert(out[0]==100&&out[6]==1&&digits[0]==10);assert(ExtensionSnapshot(1,out)==1);HardwareSafe();
- assert(!HardwarePrepare(23));HardwareStart(0,p);decode_delta=2;for(i=0;i<20;i++)HardwareTick();decode_delta=-3;for(i=0;i<20;i++)HardwareTick();ExtensionSnapshot(0,out);assert(out[0]==5&&out[2]==3);HardwareSafe();
+ assert(!HardwarePrepare(18));HardwareStart(0,p);for(i=0;i<20;i++)HardwareTick();ExtensionSnapshot(0,out);assert(out[0]==100&&out[6]==1&&digits[0]==10);assert(ExtensionSnapshot(1,out)==1);HardwareSafe();
+ assert(!HardwarePrepare(22));HardwareStart(0,p);decode_delta=2;for(i=0;i<20;i++)HardwareTick();decode_delta=-3;for(i=0;i<20;i++)HardwareTick();ExtensionSnapshot(0,out);assert(out[0]==5&&out[2]==3);HardwareSafe();
+ P1M0=0xa8;P1M1=0x50;ext11=980;
+ assert(!HardwarePrepare(19));assert((P1M0&3)==3&&(P1M1&3)==0&&EXTmodel==enumEXTPWM);HardwareStart(0,p);HardwareTick();assert(pwm1==30);HardwareSafe();assert(EXTmodel==255);
+ assert(!HardwarePrepare(18));assert((P1M0&3)==2&&(P1M1&3)==1&&EXTmodel==enumEXTUltraSonic);HardwareSafe();
+ assert(!HardwarePrepare(20));assert((P1M0&3)==2&&(P1M1&3)==1&&EXTmodel==enumEXTWeight);HardwareSafe();
+ assert(!HardwarePrepare(21));HardwareStart(0,p);for(i=0;i<20;i++)HardwareTick();ExtensionSnapshot(0,out);assert(out[0]==(980&255)&&out[1]==3);HardwareSafe();
+ assert(!HardwarePrepare(22));assert((P1M0&3)==0&&(P1M1&3)==0&&(P1&3)==3);HardwareSafe();
+ assert((P1M0&0xfc)==0xa8&&(P1M1&0xfc)==0x50);
  p[0]=33;assert(!HardwarePrepare(13));bad_restore=1;HardwareStart(0,p);for(i=0;i<90;i++)HardwareTick();assert(hw_error==7);assert(HardwarePrepare(13)==4);puts("PASS: EEPROM restore/cancel/idempotency/lockout and ADC K3 events");return 0;}

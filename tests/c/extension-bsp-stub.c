@@ -1,6 +1,7 @@
 #include "diagnostic-bsp-stub.h"
+unsigned char P1,P1M0,P1M1,CCAPM1,EXTmodel;
 unsigned char pwm1,pwm2,step_status,rfid_regs[64];int decode_delta,ultrasonic=100,weight=1000;
-void EXTInit(char a){}void SetPWM(unsigned char a,unsigned char b,unsigned char c,unsigned char d){pwm1=a;pwm2=c;}
+void EXTInit(char a){EXTmodel=a;}void SetPWM(unsigned char a,unsigned char b,unsigned char c,unsigned char d){pwm1=a;pwm2=c;}
 int GetWeight(void){return weight;}int GetDecode(void){int v=decode_delta;decode_delta=0;return v;}int GetUltraSonic(void){return ultrasonic;}
 void StepMotorInit(void){step_status=0;}char SetStepMotor(char m,unsigned char speed,int steps){step_status=1;return enumSetStepMotorOK;}
 int EmStop(char m){step_status=0;return 0;}unsigned char GetStepMotorStatus(char m){return step_status;}

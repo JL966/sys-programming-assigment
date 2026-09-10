@@ -7,6 +7,10 @@ try {
  if($LASTEXITCODE){throw 'C host build failed'}
  & ./tests/c/diagnostic-test.exe
  if($LASTEXITCODE){throw 'C regression failed'}
+ & gcc -DDIAG_HOST_TEST -Dxdata= -Itests/c -Ifirmware/diagnostic/inc firmware/diagnostic/source/rfid_readonly.c tests/c/test_rfid_readonly.c -o tests/c/rfid-test.exe
+ if($LASTEXITCODE){throw 'RFID host build failed'}
+ & ./tests/c/rfid-test.exe
+ if($LASTEXITCODE){throw 'RFID state regression failed'}
  & ./firmware/diagnostic/build.ps1
  & ./scripts/verify-intel-hex.ps1 -Path firmware/diagnostic/output/AcceptanceDiagnostic.hex
  Write-Output 'Software verification passed. Physical-board testing is still required.'
