@@ -8,66 +8,42 @@
   <link rel="icon" href="data:,">
 </head>
 <body>
-  <header class="site-header">
-    <div class="brand">
-      <p class="eyebrow">STC LEARNING BOARD · POST-SOLDER CHECK</p>
-      <b>焊后无忧</b>
-      <span>学习板焊接故障诊断系统</span>
-    </div>
-    <p class="header-note">诊断固件 · 过程留痕 · 安全复测</p>
+  <header class="workspace-bar">
+    <div class="workspace-brand"><b>焊后无忧</b></div>
+    <div class="workspace-meta" aria-label="诊断状态"><span id="connection-state"><i class="status-dot"></i>被测板待连接</span></div>
   </header>
 
   <main class="app-shell">
-    <section class="hero" aria-labelledby="page-title">
-      <div>
-        <p class="section-kicker">现场诊断工作台</p>
-        <h1 id="page-title">按步骤检查，而不是凭感觉排错。</h1>
-        <p class="lead">连接学习板后，系统会保留每一项测试的结果、异常现象和复测记录，便于焊后自查与维修复核。</p>
-      </div>
-      <dl class="connection-status" aria-label="当前诊断连接状态">
-        <div><dt>被测板</dt><dd><span class="status-dot"></span>待连接</dd></div>
-        <div><dt>辅助板</dt><dd><span class="status-dot"></span>按需连接</dd></div>
-        <div><dt>诊断项目</dt><dd>24 项</dd></div>
-      </dl>
-    </section>
+    <section class="operation-panel panel" aria-label="诊断准备与操作">
+      <section class="connection-zone" aria-labelledby="connection-title">
+        <div class="panel-heading"><h2 id="connection-title">设备连接</h2></div>
+        <div class="connection-actions">
+          <button class="primary" id="connect">连接被测板</button>
+          <button id="aux">连接辅助板</button>
+          <button id="swap" disabled>交换两板</button>
+        </div>
+        <p id="ports" class="port-status">尚未连接</p>
+      </section>
 
-    <section class="connection" aria-labelledby="connection-title">
-      <div class="section-heading">
-        <div><p class="section-kicker">第一步</p><h2 id="connection-title">连接与身份确认</h2></div>
-        <p>请先烧录统一诊断 HEX；红外和 RS485 项目才需要辅助板。</p>
-      </div>
-      <div class="connection-actions">
-        <button id="connect">连接被测板</button>
-        <button id="aux">连接辅助板</button>
-        <button id="swap" disabled>交换两板</button>
-      </div>
-      <p id="ports" class="port-status">尚未连接</p>
+      <section class="diagnosis-zone action-bar" aria-label="诊断操作">
+        <div class="panel-heading"><h2>开始诊断</h2></div>
+        <div class="primary-actions">
+          <button class="primary" id="all">一键整轮</button>
+          <label class="test-picker"><span>单项复测</span><select id="test" aria-label="选择测试"></select></label>
+          <button id="single">开始单项</button>
+          <button id="cancel" disabled>取消整轮</button>
+        </div>
+        <div class="utility-actions">
+          <button id="history">历史记录</button>
+          <button id="resume">恢复未完成轮次</button>
+        </div>
+      </section>
     </section>
 
     <div id="notice" class="notice" role="status"></div>
 
-    <ol class="workflow" aria-label="诊断流程">
-      <li><span>01</span><strong>连接设备</strong><small>核对被测板与辅助板</small></li>
-      <li><span>02</span><strong>选择项目</strong><small>整轮或单项复测</small></li>
-      <li><span>03</span><strong>执行检查</strong><small>按现场提示操作</small></li>
-      <li><span>04</span><strong>保存证据</strong><small>导出结果与建议</small></li>
-    </ol>
-
-    <section class="toolbar action-bar" aria-label="诊断操作">
-      <div class="primary-actions">
-        <button class="primary" id="all">一键整轮</button>
-        <label class="test-picker"><span>单项复测</span><select id="test" aria-label="选择测试"></select></label>
-        <button id="single">开始单项</button>
-        <button id="cancel" disabled>取消整轮</button>
-      </div>
-      <div class="utility-actions">
-        <button id="history">历史记录</button>
-        <button id="resume">恢复未完成轮次</button>
-      </div>
-    </section>
-
-    <section id="task" class="task-card" hidden aria-live="polite">
-      <div class="task-heading"><div><p id="count" class="section-kicker"></p><h2 id="title"></h2></div><p>请以页面提示和实物现象共同判断，不确定时保留为未测试。</p></div>
+    <section id="task" class="task-card panel" hidden aria-live="polite">
+      <div class="task-heading"><div><p id="count" class="section-kicker"></p><h2 id="title"></h2></div></div>
       <div class="test-layout">
         <div class="operation">
           <ol id="steps"></ol>
@@ -83,13 +59,13 @@
       </div>
     </section>
 
-    <section class="result-head">
-      <div><p class="section-kicker">证据与结论</p><h2 id="overall">未完成</h2><p id="counts"></p></div>
-      <div class="result-actions"><button id="filter">只显示异常和未测试</button><button id="html">导出 HTML</button><button id="json">导出 JSON</button></div>
+    <section class="result-panel panel" aria-label="诊断结果">
+      <div class="result-head">
+        <div><h2 id="overall">未完成</h2><p id="counts"></p></div>
+        <div class="result-actions"><button id="toggle-list" aria-expanded="false">展开清单</button><button id="filter">仅看异常和未测试</button><button id="html">导出 HTML</button><button id="json">导出 JSON</button></div>
+      </div>
+      <section id="list" hidden aria-label="诊断结果列表"></section>
     </section>
-    <section id="list" aria-label="诊断结果列表"></section>
-
-    <footer>“正常”仅代表本轮检查通过；人工确认不等于自动检测。辅助板只用于红外与 RS485 对照测试。</footer>
   </main>
   <script type="module" src="js/diagnostic-app.js"></script>
 </body>

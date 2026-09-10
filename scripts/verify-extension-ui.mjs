@@ -12,7 +12,7 @@ try{
  await page.route('**/diagnostic-client.js',route=>route.fulfill({contentType:'text/javascript',body:`export class Board{constructor(){this.connected=true;this.log=[];window.qaBoard=this;}async open(){return this;}async close(){this.connected=false;}async ask(cmd,a,id,step){if(cmd===16)this.test=id;if(cmd===18)return [0,3,0,0,0,5,0,0];if(cmd===1)return [0,2,2,0,0,0,0,0];return [0,0,0,0,0,0,0,0];}}`}));
  await page.goto('http://127.0.0.1:8000');
  assert.equal(await page.locator('#test option').count(),24);assert.equal(await page.locator('.row').count(),24);
- await page.locator('#connect').click();await page.locator('#test').selectOption('20');await page.locator('#single').click();
+ await page.locator('#connect').click();assert.equal(await page.locator('#connection-state').innerText(),'被测板已连接');assert.equal(await page.locator('#notice').innerText(),'');await page.locator('#test').selectOption('20');await page.locator('#single').click();
  await page.getByRole('button',{name:'已拔掉USB',exact:true}).waitFor();
  await page.screenshot({path:'.local-history/extension-qa/desktop-wiring.png',fullPage:true});
  await page.evaluate(()=>window.qaBoard.connected=false);await page.getByRole('button',{name:'已拔掉USB',exact:true}).click();
