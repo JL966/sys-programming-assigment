@@ -32,14 +32,14 @@ static void command(void) {
     for(i=14;i<22;i++)tx[i]=0;
     a=(unsigned int)pending[6]|((unsigned int)pending[7]<<8);
     if(pending[3]==HELLO){
-        tx[15]=2;tx[16]=2;tx[17]=0;
+        tx[15]=2;tx[16]=3;tx[17]=0;
         tx[18]=(unsigned char)uptime;tx[19]=(unsigned char)(uptime>>8);tx[20]=(unsigned char)(uptime>>16);tx[21]=(unsigned char)(uptime>>24);
-    }else if(pending[3]==2){tx[15]=255;tx[16]=255;tx[17]=255;
+    }else if(pending[3]==2){tx[15]=255;tx[16]=255;tx[17]=127;
     }else if(pending[3]==ROLE){err=HardwareRole(pending[14]);
     }else if(pending[3]==PROGRESS){err=HardwareProgress(pending[14]);
     }else if(pending[3]==PREPARE){
         if(a==0)err=1;
-        else if(a!=attempt || pending[10]!=current_test){err=HardwarePrepare(pending[10]);if(!err)attempt=a;}
+        else if(a!=attempt || pending[10]!=current_test || (pending[10]>=18 && phase==0)){err=HardwarePrepare(pending[10]);if(!err)attempt=a;}
     }else if(pending[3]==STOP){HardwareSafe();}
     else if(a!=attempt || pending[10]!=current_test)err=2;
     else if(pending[3]==START)err=HardwareStart(pending[11],pending+14);

@@ -1,5 +1,6 @@
 #ifndef DIAG_EXTENSION_H
 #define DIAG_EXTENSION_H
+void ExtensionInit(void);
 void ExtensionSafe(void);
 void ExtensionPrepare(unsigned char id);
 unsigned char ExtensionStart(unsigned char step, unsigned char *p);

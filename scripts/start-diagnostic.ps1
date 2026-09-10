@@ -1,6 +1,6 @@
 param([switch]$CheckOnly)
 $ErrorActionPreference='Stop'
-$release='2.2.0'
+$release='2.3.0'
 Write-Output "STC Diagnostic $release"
 $root=Split-Path $PSScriptRoot -Parent
 $node=Get-Command node -ErrorAction SilentlyContinue
