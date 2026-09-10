@@ -14,6 +14,23 @@
   </header>
 
   <main class="app-shell">
+    <section id="learning-board" class="learning-board-panel panel" aria-labelledby="learning-board-title">
+      <div class="learning-board-heading">
+        <h2 id="learning-board-title">认识学习板</h2>
+        <div class="learning-board-controls" role="tablist" aria-label="认识学习板视图">
+          <button type="button" class="learning-tab is-active" data-learning-tab="board" role="tab" aria-controls="learning-panel-board" aria-selected="true" disabled>学习板</button>
+          <button type="button" class="learning-tab" data-learning-tab="components" role="tab" aria-controls="learning-panel-components" aria-selected="false" disabled>元器件</button>
+          <button type="button" class="learning-tab" data-learning-tab="extensions" role="tab" aria-controls="learning-panel-extensions" aria-selected="false" disabled>扩展模块</button>
+          <button type="button" id="learning-fold" aria-expanded="false">展开</button>
+        </div>
+      </div>
+      <div class="learning-panels is-collapsed">
+        <div id="learning-panel-board" class="learning-stage" data-learning-panel="board" role="tabpanel" aria-label="学习板"></div>
+        <div id="learning-panel-components" class="learning-components" data-learning-panel="components" role="tabpanel" aria-label="元器件" hidden></div>
+        <div id="learning-panel-extensions" class="learning-extension-grid" data-learning-panel="extensions" role="tabpanel" aria-label="扩展模块" hidden></div>
+      </div>
+    </section>
+
     <section class="operation-panel panel" aria-label="诊断准备与操作">
       <section class="connection-zone" aria-labelledby="connection-title">
         <div class="panel-heading"><h2 id="connection-title">设备连接</h2></div>
@@ -52,7 +69,6 @@
           <p id="timer" aria-live="off"></p>
           <progress id="progress" max="1" value="0" hidden></progress>
           <div id="choices"></div>
-          <label class="note-label">现场备注（可选）<input id="user-note" maxlength="240" placeholder="例如：反转不动"></label>
           <button id="skip">跳过此项</button>
         </div>
         <aside id="device" hidden></aside>
@@ -62,9 +78,9 @@
     <section class="result-panel panel" aria-label="诊断结果">
       <div class="result-head">
         <div><h2 id="overall">未完成</h2><p id="counts"></p></div>
-        <div class="result-actions"><button id="toggle-list" aria-expanded="false">展开清单</button><button id="filter" disabled>仅看异常和未测试</button><button id="html">导出 HTML</button><button id="json">导出 JSON</button></div>
+        <div class="result-actions"><button id="toggle-list" aria-expanded="true">收起清单</button><button id="filter">仅看异常和未测试</button><button id="html">导出 HTML</button><button id="json">导出 JSON</button></div>
       </div>
-      <section id="list" hidden aria-label="诊断结果列表"></section>
+      <section id="list" aria-label="诊断结果列表"></section>
     </section>
   </main>
   <script type="module" src="js/diagnostic-app.js"></script>

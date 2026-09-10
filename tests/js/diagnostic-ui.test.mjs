@@ -7,6 +7,12 @@ const page = await readFile(new URL('web/index.html', root), 'utf8');
 const styles = await readFile(new URL('web/style.css', root), 'utf8');
 const app = await readFile(new URL('web/js/diagnostic-app.js', root), 'utf8');
 
+test('notes are removed and all row statuses share typography and alignment', () => {
+  assert.doesNotMatch(page, /user-note|现场备注/);
+  assert.doesNotMatch(app, /user-note|rawResult\.userNote/);
+  assert.match(styles, /\.row-title > span, \.row > details > summary > span\s*\{[^}]*text-align: right;[^}]*font-size: 12px;[^}]*font-weight: 400;/);
+});
+
 test('diagnostic dashboard keeps functional controls in one compact operations panel', () => {
   for (const id of ['connect', 'aux', 'swap', 'all', 'test', 'single', 'cancel', 'history', 'resume', 'task', 'list']) {
     assert.match(page, new RegExp(`id="${id}"`), `missing existing control #${id}`);
@@ -44,20 +50,20 @@ test('diagnostic stylesheet provides an uncluttered tool layout and mobile actio
 
 test('result rows reserve one aligned status column and respect reduced motion', () => {
   assert.match(app, /row \$\{i\.status\} row-enter/);
-  assert.match(styles, /\.row-title, summary\s*\{[^}]*display:\s*grid[^}]*grid-template-columns:/s);
+  assert.match(styles, /\.row-title, \.row > details > summary\s*\{[^}]*display:\s*grid[^}]*grid-template-columns:/s);
   assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 });
 
 test('result list can be collapsed without changing diagnostic data', () => {
   assert.match(app, /\$\('toggle-list'\)\.onclick/);
-  assert.match(app, /\$\('list'\)\.hidden=/);
+  assert.match(app, /animatePanel\(\$\('list'\),!hidden\)/);
   assert.match(app, /setAttribute\('aria-expanded'/);
 });
 
-test('diagnostic result card starts with its detailed list collapsed', () => {
+test('diagnostic result card starts with its detailed list expanded', () => {
   assert.match(page, /class="result-panel panel"/);
-  assert.match(page, /id="toggle-list"[^>]*aria-expanded="false"[^>]*>展开清单</);
-  assert.match(page, /<section id="list"[^>]*hidden[^>]*>/);
+  assert.match(page, /id="toggle-list"[^>]*aria-expanded="true"[^>]*>收起清单</);
+  assert.doesNotMatch(page, /<section id="list"[^>]*hidden[^>]*>/);
 });
 
 test('visual polish uses a warm primary action and low-distraction CSS ambient particles', () => {

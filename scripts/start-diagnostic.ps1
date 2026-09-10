@@ -1,6 +1,6 @@
 param([switch]$CheckOnly)
 $ErrorActionPreference='Stop'
-$release='2.3.0'
+$release='2.4.0'
 Write-Output "STC Diagnostic $release"
 $root=Split-Path $PSScriptRoot -Parent
 $node=Get-Command node -ErrorAction SilentlyContinue
@@ -20,10 +20,15 @@ if(!$response){
 $stamp=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
 # The existing static server reads files on every request. Reuse it only when
 # its served application matches this checkout, without stopping other processes.
-foreach($asset in @('index.html','js/diagnostic-app.js','js/diagnostic-runner.js','js/diagnostic-core.js','js/diagnostic-client.js','js/diagnostic-feedback.js','js/diagnostic-store.js','js/extension-runner.js','js/device-assets.js','style.css')){
+foreach($asset in @('index.html','js/diagnostic-app.js','js/diagnostic-runner.js','js/diagnostic-core.js','js/diagnostic-client.js','js/diagnostic-feedback.js','js/diagnostic-messages.js','js/diagnostic-store.js','js/extension-runner.js','js/device-assets.js','js/learning-board-data.js','js/learning-board.js','js/panel-motion.js','style.css')){
  $served=Invoke-WebRequest "$url/$asset`?launch=$stamp" -UseBasicParsing -TimeoutSec 5
  $local=[IO.File]::ReadAllText((Join-Path $root "web/$asset"),[Text.Encoding]::UTF8)
  if($served.Content -cne $local){throw "Port 8000 serves different project files ($asset). Close the old diagnostic service and try again."}
+}
+foreach($asset in @('assets/learning-board/board-assembled.webp','assets/learning-board/component-overview.webp','assets/learning-board/stepper-motor.webp','assets/learning-board/ultrasonic-module.webp','assets/learning-board/dc-motor.webp','assets/learning-board/electronic-scale.webp','assets/learning-board/electronic-ruler.webp','assets/learning-board/rotary-angle-sensor.webp','assets/learning-board/rfid-reader.webp')){
+ $served=Invoke-WebRequest "$url/$asset`?launch=$stamp" -UseBasicParsing -TimeoutSec 5
+ $local=Get-Item -LiteralPath (Join-Path $root "web/$asset")
+ if($served.StatusCode -ne 200 -or $served.RawContentLength -ne $local.Length){throw "Current learning-board asset is missing or stale ($asset)."}
 }
 Write-Output "Verified: current checkout web files match http://127.0.0.1:8000 (release $release)."
 if($CheckOnly){return}
