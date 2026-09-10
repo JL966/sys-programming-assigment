@@ -21,4 +21,4 @@ test('dual link counts distinct sequences, permits 4/5 and records attempts',asy
  assert(a.asks.includes(CMD.STOP));assert.equal(a.asks.at(-1),CMD.ROLE);
 });
 test('one failing direction fails whole link',async()=>{const r=new Runner(board([1,2]),board(),async()=>{},async()=>{});r.pause=async()=>{};assert.equal((await r.run(15,30)).status,'ABNORMAL');});
-test('manual no-response becomes untested, never abnormal',async()=>{const b=board();b.ask=async c=>c===CMD.STATUS?[0,3]:[0];const r=new Runner(b,null,async()=>{},async()=>{});r.manual=async()=> '确认超时';assert.equal((await r.run(7,2)).status,'UNTESTED');});
+test('runner preserves manual no-response for the presentation layer',async()=>{const b=board();b.ask=async c=>c===CMD.STATUS?[0,3]:[0];const r=new Runner(b,null,async()=>{},async()=>{});r.manual=async()=> '确认超时';assert.equal((await r.run(7,2)).status,'UNTESTED');});
