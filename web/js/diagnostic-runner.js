@@ -6,7 +6,7 @@ export class Runner {
  constructor(board,aux,ui,backup,update=()=>{},reconnect=async()=>{throw Error('未配置重连流程');},checkpoint=async()=>{}){Object.assign(this,{board,aux,ui,backup,update,reconnect,checkpoint});this.deadline=0;this.live='';this.cancelled=false;this.data=[];}
  clock(ms=0){this.deadline=ms?Date.now()+ms:0;this.total=ms;this.report();}
  report(text){if(text!==undefined)this.live=text;this.update({text:this.live,remaining:this.deadline?Math.max(0,this.deadline-Date.now()):null,total:this.total});}
- async manual(steps,ms){this.clock(ms);this.report('请按实际看到或听到的现象选择结果');let timer,connection;try{return await Promise.race([this.ui(steps,['正常','异常','无法确认']),new Promise(r=>{timer=setTimeout(()=>r('确认超时'),ms);}),new Promise((_,reject)=>{connection=setInterval(()=>{try{this.check();}catch(e){reject(e);}},100);})]);}finally{clearTimeout(timer);clearInterval(connection);this.clock();}}
+ async manual(steps,ms){this.clock(ms);this.report('请按实际看到或听到的现象选择结果');let timer,connection;try{return await Promise.race([this.ui(steps,['正常','异常']),new Promise(r=>{timer=setTimeout(()=>r('确认超时'),ms);}),new Promise((_,reject)=>{connection=setInterval(()=>{try{this.check();}catch(e){reject(e);}},100);})]);}finally{clearTimeout(timer);clearInterval(connection);this.clock();}}
  check(){if(this.cancelled)throw Error('用户跳过或取消');if(!this.board.connected || ((this.id===15||this.id===16)&&this.aux&&!this.aux.connected))throw Error('连接中断');}
  async pause(ms){for(let t=0;t<ms;t+=100){this.check();this.report();await wait(Math.min(100,ms-t));}}
  async q(cmd,step=0,p=[],b=this.board){this.check();const r=await b.ask(cmd,this.attempt,this.id,step,p);this.data.push({cmd,step,p:r,board:b===this.board?'被测板':'辅助板',at:Date.now()});return r.slice(1);}
@@ -19,11 +19,11 @@ export class Runner {
   if(id>=17)return await runExtension(this);
   await this.q(CMD.PREPARE);
   if([3,4,7,14].includes(id)){
-   const instructions={3:['观察L0至L7逐个点亮。','确认全亮和全灭均正确。'],4:['观察全段、12345678及逐段图案。','确认没有缺段、缺位和错位。'],7:['保持周围安静。','确认听到三段短音。'],14:['插入已知正常的有线耳机。','收听95.5MHz，确认有可辨识广播。','仅有沙沙噪声请选择无法确认。']};
+   const instructions={3:['观察L0至L7逐个点亮。','确认全亮和全灭均正确。'],4:['观察全段、12345678及逐段图案。','确认没有缺段、缺位和错位。'],7:['保持周围安静。','确认听到三段短音。'],14:['插入已知正常的有线耳机。','收听95.5MHz，确认有可辨识广播。','仅有沙沙噪声请选择异常。']};
    await this.prompt(instructions[id]);await this.q(CMD.START);
    let keep=setInterval(()=>this.board.ask(CMD.STATUS,this.attempt,id).catch(()=>{}),1000);
    try{if(id!==14)await this.poll(()=>this.q(CMD.STATUS),p=>p[0]===3,20000);else await this.q(CMD.SNAPSHOT);
-    const choice=await this.manual(instructions[id],id===14?D.fm:D.manual);this.check();return {status:choice==='正常'?'NORMAL':choice==='异常'?'ABNORMAL':'UNTESTED',source:'MANUAL',reason:choice==='异常'?'操作者确认现象不符合预期':choice==='无法确认'?'操作者无法确认现象':choice==='确认超时'?'人工确认超时；请复测并选择观察结果':'',evidence:this.data};
+    const choice=await this.manual(instructions[id],id===14?D.fm:D.manual);this.check();return {status:choice==='正常'?'NORMAL':choice==='异常'?'ABNORMAL':'UNTESTED',source:'MANUAL',reason:choice==='异常'?'操作者确认现象不符合预期':choice==='确认超时'?'人工确认超时；请复测并选择观察结果':'',evidence:this.data};
    }finally{clearInterval(keep);}
   }
   if(id===5||id===6){const keys=id===5?['K1','K2','K3']:['上','下','左','右','中'];for(let k=0;k<keys.length;k++){await this.prompt([`准备操作${keys[k]}。`,`开始后按下并松开；数码管从0变成${k+1}表示收到按下。`]);await this.q(CMD.START,k);await this.poll(()=>this.q(CMD.SNAPSHOT),p=>{this.report(`${keys[k]}：${p[0]?'已按下':'等待按下'} · ${p[1]?'已松开':'等待松开'}`);if(p[2])throw Error('检测到其他按键，请按当前提示复测');return p[0]&&p[1];});await this.pause(400);}}
