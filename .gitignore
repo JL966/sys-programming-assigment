@@ -2,11 +2,10 @@
 node_modules/
 .vscode/
 .idea/
-.playwright-cli/
 *.user
 *.suo
 
-# Keil intermediate files (keep .hex, .m51 and build.log as delivery evidence)
+# Keil generated files
 *.obj
 *.lst
 *.lnp
@@ -19,18 +18,5 @@ node_modules/
 *.__i
 firmware/**/output/*
 !firmware/**/output/*.hex
-
-# Test executables and transient files
-tests/c/*.exe
-tests/c/*.out
-tests/bin/
-*.tmp
-*.temp
-
-# Optional local worktrees
-.worktrees/
-
-# Local historical material and build evidence (not part of the product)
-.local-history/
 firmware/diagnostic/build.log
 firmware/diagnostic/list/

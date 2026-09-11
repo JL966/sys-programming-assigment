@@ -223,15 +223,3 @@ export function resolveDiagnosticMessage(id,result,context={}){
   const message=item?.entries[failureCode]||item?.entries.fallback||{reason:'本项检测没有按预期完成。',advice:'确认操作正确后重新测试；仍异常再联系老师。'};
   return {...result,failureCode,reason:message.reason,advice:message.advice,repairNotice};
 }
-
-export function renderDiagnosticMessageMarkdown(){
-  const lines=['# 诊断异常原因与处理建议','','> 所有原因均为根据本轮检测证据得到的可能原因，不等同于最终维修结论。请先核对操作并重新测试；报修请联系老师，勿自行拆焊或维修。',''];
-  for(const item of diagnosticMessages){
-    lines.push(`## ${String(item.id).padStart(2,'0')} ${item.name}`,'');
-    for(const [key,value] of Object.entries(item.entries)){
-      lines.push(`### ${value.label}${key==='fallback'?'（兜底）':''}`,'',`- 原因：${value.reason}`,`- 建议：${value.advice}`,'');
-    }
-    lines.push('- 未测试：本项已跳过或缺少必要设备时，只显示一行未获得有效检测结果的说明。','');
-  }
-  return lines.join('\n');
-}
