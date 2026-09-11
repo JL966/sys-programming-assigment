@@ -5,6 +5,6 @@ import {report} from '../../web/js/diagnostic-store.js';
 test('CRC golden vector',()=>assert.equal(crc(new TextEncoder().encode('123456789')),0x4b37));
 test('24-byte protocol roundtrip and corruption',()=>{const p=frame(17,345,12,8,3,[1,2]);assert.equal(p.length,24);assert.equal(decode(p).attempt,12);p[15]^=1;assert.equal(decode(p),null);});
 test('summary priority',()=>{assert.equal(summary([{status:'NORMAL'}]),'本轮通过');assert.equal(summary([{status:'UNTESTED'}]),'未完成');assert.equal(summary([{status:'UNTESTED'},{status:'ABNORMAL'}]),'发现异常');});
-test('small changes and noise floor',()=>{assert.equal(median([3,1,2]),2);assert.equal(threshold([100,100,100],8),2);assert.equal(threshold([100,110],8),11);});
+test('temperature noise margin and unchanged light threshold',()=>{assert.equal(median([3,1,2]),2);assert.equal(threshold([500,500,500],8),12);assert.equal(threshold([500,510],8),34);assert.equal(threshold([500,500],9),4);assert.equal(threshold([500,510],9),12);});
 test('RTC BCD calendar and rollover',()=>{assert.equal(rtcTime([0,0,0,1,1,3,0x26])-rtcTime([0x59,0x59,0x23,0x31,0x12,2,0x25]),1000);assert.throws(()=>rtcTime([0x6a,0,0,1,1,1,0x26]));assert.throws(()=>rtcTime([0,0,0,0x31,2,1,0x26]));});
 test('report escapes untrusted evidence',()=>{const h=report({started:'now',rules:'2',items:[{id:1,name:'<script>',status:'ABNORMAL',reason:'<img>',advice:'a'}]});assert(!h.includes('<script>'));assert(h.includes('&lt;script&gt;'));});
