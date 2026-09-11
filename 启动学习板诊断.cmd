@@ -7,6 +7,7 @@ rem Both panels use reversible expand/collapse motion.
 rem Callout and result details use smooth, compact transitions.
 rem Straight red arrows: refined sensor/socket endpoints and raised IR label.
 rem No manual notes; all result statuses share the same typography.
+rem Temperature detection now requires sustained warming above the noise margin.
 cd /d "%~dp0"
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\start-diagnostic.ps1"
 if errorlevel 1 pause

@@ -7,6 +7,6 @@ export function frame(cmd,seq,attempt=0,test=0,step=0,p=[]){const a=new Uint8Arr
 export function decode(a){if(a.length!==24||a[0]!==165||a[1]!==90||a[2]!==2||a[12]!==8||crc(a.slice(2,22))!==(a[22]|a[23]<<8))return null;return {cmd:a[3],src:a[4],dst:a[5],attempt:a[6]|a[7]<<8,seq:a[8]|a[9]<<8,test:a[10],step:a[11],flags:a[13],p:Array.from(a.slice(14,22)),raw:Array.from(a)};}
 export function summary(items){return items.some(x=>x.status==='ABNORMAL')?'发现异常':items.some(x=>x.status!=='NORMAL')?'未完成':'本轮通过';}
 export function median(a){const s=[...a].sort((x,y)=>x-y);return s[Math.floor(s.length/2)];}
-export function threshold(a,id){return Math.max(id===8?2:4,Math.max(...a)-Math.min(...a)+(id===8?1:2));}
+export function threshold(a,id){const noise=Math.max(...a)-Math.min(...a);return id===8?Math.max(12,noise*3+4):Math.max(4,noise+2);}
 export function rtcTime(p){const b=v=>{if((v&15)>9||(v>>4)>9)throw Error('RTC字段不是合法BCD');return (v>>4)*10+(v&15);};const [s,m,h,d,mo,w,y]=p.map(b);if(s>59||m>59||h>23||d<1||mo<1||mo>12||w<1||w>7)throw Error('RTC字段超出范围');const t=Date.UTC(2000+y,mo-1,d,h,m,s);if(new Date(t).getUTCDate()!==d)throw Error('RTC日期无效');return t;}
 export const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
